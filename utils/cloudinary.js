@@ -4,7 +4,6 @@ const dotenv = require('dotenv').config()
 if (dotenv.error) {
     throw result.error
 }
-console.log(process.env.API_KEY)
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUD_NAME, 

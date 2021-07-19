@@ -40,8 +40,8 @@ export default function MainMenu() {
               style={{color: 'white'}} 
               pointing 
               text={`
-              ${user.data.firstName.slice(0, 1).toUpperCase()}${user.data.firstName.slice(1)}
-              ${user.data.lastName.slice(0, 1).toUpperCase()}${user.data.lastName.slice(1)}`} 
+              ${user.data['First Name'].slice(0, 1).toUpperCase()}${user.data['First Name'].slice(1)}
+              ${user.data['Last Name'].slice(0, 1).toUpperCase()}${user.data['Last Name'].slice(1)}`} 
               >
               <Dropdown.Menu>
                 <Dropdown.Item 

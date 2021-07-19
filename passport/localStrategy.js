@@ -3,13 +3,14 @@ const LocalStrategy = require('passport-local').Strategy
 
 const strategy = new LocalStrategy(
 	{
-		usernameField: 'email',
-		passwordField: 'password',
-		passReqToCallback: true
+		usernameField: 'Email',
+		passwordField: 'Password',
 	},
-	function(req, email, password, done) {
-    console.log(password)
-		db.User.findOne({ email: email }, (err, user) => {
+	function(Email, Password, done) {
+		console.log("line 13" + Email)
+    	console.log(Password)
+		db.User.findOne({ Email: Email }, (err, user) => {
+			console.log(user)
 			if (err) {
         		console.log('normal error')
 				return done(err)
@@ -20,8 +21,9 @@ const strategy = new LocalStrategy(
 				return done(null, false)
       		}
       
-      		if (!user.checkPassword(password)) {
-        		console.log('no match')
+      		if (!user.checkPassword(Password)) {
+				console.log('no match')
+				console.log(user.checkPassword(Password))
 				return done(null, false)
 			}
 	

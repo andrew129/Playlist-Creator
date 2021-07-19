@@ -3,13 +3,15 @@ import { Button, Form, Input } from 'semantic-ui-react';
 import { useState, useEffect } from 'react'
 import API from '../../utils/API';
 
+const fieldNames = ['First Name', 'Last Name', 'Email', 'Password']
+
 export default function RegisterForm() {
 
     const [info, setInfo] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: ''
+        "First Name": '',
+        "Last Name": '',
+        "Email": '',
+        "Password": ''
     })
 
     const [errors, setErrors] = useState({})
@@ -34,45 +36,18 @@ export default function RegisterForm() {
 
     return (
         <Form size='large' onSubmit={registerUser}>
-            <Form.Field 
-                placeholder='Enter First Name' 
-                style={{height: '40px'}} 
-                onChange={e => setInfo({ ...info, [e.target.name]: e.target.value })} 
-                name='firstName' 
-                control={Input} 
-                label='First Name'
-                className='form-field' 
-                error={readyForErrors ? errors['firstName'] : ''}
-            />
-            <Form.Field 
-                name='lastName' 
-                control={Input} 
-                label='Last Name' 
-                error={readyForErrors ? errors['lastName'] : ''}
-                className='form-field'
-                onChange={e => setInfo({ ...info, [e.target.name]: e.target.value })}
-                style={{height: '40px'}} 
-                placeholder='Enter Last Name'
-            />
-            <Form.Field 
-                name='email' 
-                control={Input} 
-                label='Email' 
-                error={readyForErrors ? errors['email'] : ''}
-                className='form-field'
-                onChange={e => setInfo({ ...info, [e.target.name]: e.target.value })}
-                style={{height: '40px'}}
-                placeholder='Enter Email Address'
-            />
-            <Form.Field 
-                control={Input} 
-                label='Password' 
-                error={readyForErrors ? errors['password'] : ''}
-                className='form-field'
-                onChange={e => setInfo({ ...info, [e.target.name]: e.target.value })}
-                name='password'
-                placeholder='Enter Password'
-            />
+            {fieldNames.map(fieldName => (
+                <Form.Field 
+                    placeholder={`Enter ${fieldName}`} 
+                    style={{height: '40px'}} 
+                    onChange={e => setInfo({ ...info, [e.target.name]: e.target.value })} 
+                    name={fieldName} 
+                    control={Input} 
+                    label={fieldName}
+                    className='form-field' 
+                    error={readyForErrors ? errors[fieldName] : ''}
+                />
+            ))}
             <Button style={{width: '100%', marginTop: '20px'}} size='large' color='orange' type='submit'>Register</Button>
         </Form>
     )

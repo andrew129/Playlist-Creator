@@ -33,11 +33,11 @@ export default function LoginForm(props) {
         <Form size='large' onSubmit={LoginUser}>
             <Form.Field className='form-field'>
                 <label>Email Address</label>
-                <input name='email' style={{height: '40px'}} onChange={e => setInfo({ ...info, [e.target.name]: e.target.value })} placeholder='Enter Email Address' />
+                <input name='Email' style={{height: '40px'}} onChange={e => setInfo({ ...info, [e.target.name]: e.target.value })} placeholder='Enter Email Address' />
             </Form.Field>
             <Form.Field className='form-field'>
                 <label>Password</label>
-                <input name='password' onChange={e => setInfo({ ...info, [e.target.name]: e.target.value })} placeholder='Enter Password' type='password' />
+                <input name='Password' onChange={e => setInfo({ ...info, [e.target.name]: e.target.value })} placeholder='Enter Password' type='password' />
             </Form.Field>
             <Button style={{width: '100%', marginTop: '20px'}} size='large' color='orange' type='submit'>Login</Button>
         </Form>

@@ -18,6 +18,7 @@ function App() {
 
   const getUser = async () => {
     const userInfo = await API.getUserInfo()
+    console.log("line 21" + userInfo)
     setUser(userInfo)
   }
 
