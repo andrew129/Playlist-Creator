@@ -26,7 +26,6 @@ router.post('/', async (req, res) => {
 })
 
 router.post('/songs', fileUploader.single('song'), async (req, res, next) => {
-    console.log('hit')
     console.log(req.file)
     // cloudinary.v2.uploader.upload(file, options, callback);
     const uploadedFile = await cloudinary.uploader.upload(req.file.path, 
@@ -39,7 +38,6 @@ router.post('/songs', fileUploader.single('song'), async (req, res, next) => {
         duration: uploadedFile.duration
     }
     try {
-        console.log('id' + req.body.playlistId)
         const createdSong = await db.Song.create(newSong)
         const updatedPlaylist = await db.Playlist.findOneAndUpdate({
             _id: req.body.playlistId
