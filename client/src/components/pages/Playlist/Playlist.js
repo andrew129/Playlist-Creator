@@ -6,6 +6,7 @@ import { Button, Header, Grid, Segment, Form, Input, } from 'semantic-ui-react';
 import { useContext, useRef } from 'react'
 import SongTable from '../../SongTable/SongTable';
 import PlaylistForm from '../../PlaylistForm';
+import Spinner from '../../Spinner';
 import axios from 'axios';
 
 export default function PlaylistCreator() {
@@ -37,7 +38,7 @@ export default function PlaylistCreator() {
         else {
             setReadyForErrors(false)
         }
-    }, [errors, songError, loading])
+    }, [errors, songError])
     
     useEffect(() => {
         if (selectedFile && songData.playlistId && songData.artist) {
@@ -52,11 +53,26 @@ export default function PlaylistCreator() {
         }
     }, [selectedFile, songData])
 
+    useEffect(() => {
+        if (!loading && songAdded) {
+            getPlaylist()
+        }
+    }, [loading, songAdded])
+
+    const getPlaylist = async () => {
+        console.log(localStorage.getItem('playlistId'))
+        const playlist = await axios.get('/api/playlists/' + localStorage.getItem('playlistId'))
+        const playlistSongs = playlist.data.songs
+        console.log(playlistSongs)
+        setSongs(playlistSongs)
+        console.log(songs)
+    }
+
     const addSong = e => {
         e.preventDefault()
         console.log(localStorage.getItem('playlistId'))
         setSongData({...songData, playlistId: localStorage.getItem('playlistId')})
-        setSongs([...songs, songData])
+        // setSongs([...songs, songData])
         setSongAdded(true)
         setShowAddButton(true)
         setChooseSong(false)
@@ -213,7 +229,7 @@ export default function PlaylistCreator() {
                             </>
                         }
                         {(loading && songAdded) &&
-                            <p>loading...</p>
+                            <Spinner />
                         }
                     </Grid.Column>
                     <Grid.Column width={2}>

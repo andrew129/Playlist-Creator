@@ -29,17 +29,17 @@ router.post('/songs', fileUploader.single('song'), async (req, res, next) => {
     const uploadedFile = await cloudinary.uploader.upload(req.file.path, 
     {resource_type: 'video', public_id: req.file.originalName})
 
-    if (uploadedFile.duration + req.body.totalDuration >2000) {
-        return res.status(400).send('Playlists are Limited to One Hour')
+    if (uploadedFile.duration + req.body.totalDuration > 2000) {
+        return res.status(400).send('Failed Upload: Total Length of Playlist must be no longer than an hour')
     }
 
     else {
         try {
             const newSong = {
-                fileName: req.file.originalname,
+                fileName: req.file.originalname.slice(0, 1).toUpperCase() + req.file.originalname.slice(1),
                 fileType: req.file.mimetype,
                 filePath: uploadedFile.secure_url,
-                artist: req.body.artist,
+                artist: req.body.artist.slice(0, 1).toUpperCase() + req.body.artist.slice(1),
                 duration: uploadedFile.duration
             }
             const createdSong = await db.Song.create(newSong)

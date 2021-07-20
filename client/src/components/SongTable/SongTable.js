@@ -1,16 +1,30 @@
 import React from 'react';
-import { Table, Button, Grid, Header } from 'semantic-ui-react';
+import { Table, Button, Header } from 'semantic-ui-react';
 
 export default function SongTable(props) {
-    const songs = props.songs.map(song => {
-        return (
-            <Table.Row>
-                {/* <Table.Cell>{song.fileName.slice()}</Table.Cell> */}
-                <Table.Cell>{song.artist}</Table.Cell>
-                {/* <Table.Cell>{song.fileType}</Table.Cell> */}
-            </Table.Row>
-        )
-    })
+
+    const convertDuration = (duration) => {
+        const decimalTime = (duration / 60).toFixed(2)
+        return decimalTime.replace('.', ':')
+    }
+    console.log(props.songs)
+        const songs = props.songs.map(song => {
+            const indexOfDot = song.fileName
+                .split('')
+                .reverse()
+                .indexOf('.')
+            console.log(indexOfDot)
+            const slicePoint = (song.fileName.length - indexOfDot) - 1
+            console.log(slicePoint)
+            return (
+                <Table.Row>
+                    <Table.Cell>{song.fileName.slice(0, slicePoint)}</Table.Cell>
+                    <Table.Cell>{song.artist}</Table.Cell>
+                    <Table.Cell>{song.fileType}</Table.Cell>
+                    <Table.Cell>{convertDuration(song.duration)}</Table.Cell>
+                </Table.Row>
+            )
+        })
     return (
         <>
             <>
@@ -29,6 +43,7 @@ export default function SongTable(props) {
                         <Table.HeaderCell>Song Title</Table.HeaderCell>
                         <Table.HeaderCell>Artist</Table.HeaderCell>
                         <Table.HeaderCell>FileType</Table.HeaderCell>
+                        <Table.HeaderCell>Duration</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>

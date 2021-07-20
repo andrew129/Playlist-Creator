@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const PlaylistSchema = new Schema({
     name: {
         type: String,
-        unique: true,
+        unique: [true, 'name is already taken'],
         trim: true,
         required: [true, 'name field cannot be blank']
     },
