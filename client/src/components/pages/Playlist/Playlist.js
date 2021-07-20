@@ -2,9 +2,8 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import API from '../../../utils/API';
 import UserContext from '../../../utils/UserContext';
-import { Button, Header, Grid, Segment, Form, Input, Select } from 'semantic-ui-react';
+import { Button, Header, Grid, Segment, Form, Input, } from 'semantic-ui-react';
 import { useContext, useRef } from 'react'
-import GenreOptions from './genreOptions.json';
 import SongTable from '../../SongTable/SongTable';
 import PlaylistForm from '../../PlaylistForm';
 import axios from 'axios';
