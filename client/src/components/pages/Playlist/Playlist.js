@@ -63,7 +63,6 @@ export default function PlaylistCreator() {
     }
 
     const createSong = async () => {
-        console.log('heelo')
         setLoading(true)
         let songFormObj = new FormData()
         songFormObj.append("song", selectedFile)
@@ -77,10 +76,8 @@ export default function PlaylistCreator() {
             }
             await axios.post('/api/playlists/songs', songFormObj)
             setLoading(false)
-            console.log(response)
         }
         catch(error) {
-            console.log(error.response.data)
             setLoading(false)
             setSongError(error.response.data)
         }
@@ -107,7 +104,6 @@ export default function PlaylistCreator() {
             }
         }
         catch (error) {
-            console.log(error.response.data)
             setErrors(error.response.data)
         }
     }
