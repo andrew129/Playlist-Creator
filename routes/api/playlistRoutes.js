@@ -29,7 +29,7 @@ router.post('/songs', fileUploader.single('song'), async (req, res, next) => {
     const uploadedFile = await cloudinary.uploader.upload(req.file.path, 
     {resource_type: 'video', public_id: req.file.originalName})
 
-    if (uploadedFile.duration + req.body.totalDuration > 200) {
+    if (uploadedFile.duration + req.body.totalDuration >2000) {
         return res.status(400).send('Playlists are Limited to One Hour')
     }
 

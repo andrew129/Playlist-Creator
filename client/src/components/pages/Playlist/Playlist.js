@@ -71,7 +71,8 @@ export default function PlaylistCreator() {
         try {
             const { data } = await axios.get('/api/playlists/' + localStorage.getItem('playlistId'))
             if (data) {
-                const totalDuration = sum(data.songs.map(({ duration }) => duration))
+                const totalDuration = data.songs.reduce((acc, song) => acc + song.duration, 0)
+                console.log(totalDuration)
                 songFormObj.append("totalDuration", totalDuration)
             }
             await axios.post('/api/playlists/songs', songFormObj)
@@ -81,14 +82,6 @@ export default function PlaylistCreator() {
             setLoading(false)
             setSongError(error.response.data)
         }
-    }
-
-    const sum = numberArr => {
-        let sum = 0;
-        for (let i = 0; i < numberArr.length; i++) {
-            sum += numberArr[i]
-        }
-        return sum
     }
 
     const revealForm = () => setShowPlaylistForm(true)
