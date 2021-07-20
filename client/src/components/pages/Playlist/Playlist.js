@@ -2,45 +2,45 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import API from '../../../utils/API';
 import UserContext from '../../../utils/UserContext';
-import { Button, Header, Grid, Segment, Form, Input, Select, Ref } from 'semantic-ui-react';
+import { Button, Header, Grid, Segment, Form, Input, Select } from 'semantic-ui-react';
 import { useContext, useRef } from 'react'
 import GenreOptions from './genreOptions.json';
 import SongTable from '../../SongTable/SongTable';
-import axios from 'axios'
+import PlaylistForm from '../../PlaylistForm';
+import axios from 'axios';
+
 export default function PlaylistCreator() {
     const user = useContext(UserContext)
-    console.log(user)
     const focusPoint = useRef(null)
     const [showPlaylistForm, setShowPlaylistForm] = useState(false)
     const [showSongForm, setShowSongForm] = useState(false)
-    const [formData, setFormData] = useState({
-        name: '',
-        tags: '',
-        genre: ''
-    })
     const [songs, setSongs] = useState([])
     const [readyForErrors, setReadyForErrors] = useState(false)
     const [errors, setErrors] = useState({})
+    const [songError, setSongError] = useState('')
     const [chooseSong, setChooseSong] = useState(false)
     const [selectedFile, setSelectedFile] = useState(null)
+    const [songAdded, setSongAdded] = useState(false)
     const [songData, setSongData]= useState({
         playlistId: '',
         artist: ''
     })
-    const [songAdded, setSongAdded] = useState(false)
-    const [showAddButton ,setShowAddButton] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [showAddButton, setShowAddButton] = useState(false)
 
     useEffect(() => {
         if (errors) {
             setReadyForErrors(true)
         }
+        else if (songError) {
+            setReadyForErrors(true)
+        }
         else {
             setReadyForErrors(false)
         }
-    }, [errors])
-
+    }, [errors, songError, loading])
+    
     useEffect(() => {
-        console.log(songData.playlistId)
         if (selectedFile && songData.playlistId && songData.artist) {
             createSong()
             setSongData({
@@ -62,24 +62,42 @@ export default function PlaylistCreator() {
         setShowAddButton(true)
         setChooseSong(false)
     }
+
     const createSong = async () => {
         console.log('heelo')
+        setLoading(true)
         let songFormObj = new FormData()
         songFormObj.append("song", selectedFile)
         songFormObj.append("artist", songData.artist)
         songFormObj.append("playlistId", songData.playlistId)
         try {
-            const updatedPlaylist = await axios.post('/api/playlists/songs', songFormObj)
-            console.log(updatedPlaylist)
+            const { data } = await axios.get('/api/playlists/' + localStorage.getItem('playlistId'))
+            if (data) {
+                const totalDuration = sum(data.songs.map(({ duration }) => duration))
+                songFormObj.append("totalDuration", totalDuration)
+            }
+            await axios.post('/api/playlists/songs', songFormObj)
+            setLoading(false)
+            console.log(response)
         }
         catch(error) {
             console.log(error.response.data)
+            setLoading(false)
+            setSongError(error.response.data)
         }
+    }
+
+    const sum = numberArr => {
+        let sum = 0;
+        for (let i = 0; i < numberArr.length; i++) {
+            sum += numberArr[i]
+        }
+        return sum
     }
 
     const revealForm = () => setShowPlaylistForm(true)
 
-    const createPlaylist = async (e) => {
+    const createPlaylist = async (e, formData) => {
         e.preventDefault()
         try {
             const { data } = await API.createPlaylist(formData)
@@ -100,11 +118,10 @@ export default function PlaylistCreator() {
     }
 
     const enable = () => {
+        setSongError('')
         setChooseSong(false)
         setShowAddButton(false)
     }
-
-    const selectGenre = (e, data) => setFormData({...formData, genre: data.value})
 
     const fileChange = e => {
         if (e.target.files[0]) {
@@ -144,43 +161,11 @@ export default function PlaylistCreator() {
                             </>
                         }
                         {(showPlaylistForm && !showSongForm) &&
-                            <Segment raised>
-                                <Header as='h1' color='blue'>Create a New Playlist</Header>
-                                <Form size='large' onSubmit={createPlaylist}>
-                                    <Form.Field 
-                                        control={Input}
-                                        label='Playlist Name' 
-                                        className='form-field'
-                                        onChange={e => setFormData({...formData, 
-                                        name: e.target.value})}
-                                        placeholder= 'Enter Playlist Name...'
-                                        error={readyForErrors ? errors['name'] : ''}
-                                    />
-                                    <Form.Field
-                                        control={Select}
-                                        style={{marginBottom: '15px'}} 
-                                        className='form-field' 
-                                        onChange={selectGenre} 
-                                        placeholder='Select the genre'
-                                        label='Genre'
-                                        options={GenreOptions}
-                                        error={readyForErrors ? errors['genre'] : ''}
-                                    />
-                                    <Form.Field 
-                                        className='form-field'
-                                        error={readyForErrors ? errors['tags'] : ''}
-                                        onChange={e => setFormData({...formData, 
-                                        tags: e.target.value})}
-                                        label='Playlist Tags'
-                                        labelPosition= 'right'
-                                        control={Input}
-                                        icon='tags'
-                                        iconPosition='left'
-                                        placeholder='Enter tags seperated by a space ex. (tag1 tag2)'
-                                    />
-                                    <Button color='orange' type='submit' style={{width: '100%', fontSize: '15px'}}>Create Playlist</Button>
-                                </Form>
-                            </Segment>
+                            <PlaylistForm
+                                createPlaylist={createPlaylist} 
+                                readyForErrors={readyForErrors}
+                                errors={errors}
+                            />
                         }
                         {(!showPlaylistForm && showSongForm) &&
                             <Segment raised>
@@ -194,7 +179,6 @@ export default function PlaylistCreator() {
                                                 onChange={e => setSongData({...songData, 
                                                 artist: e.target.value})}
                                                 placeholder= 'Enter Artist Name...'
-                                                error={readyForErrors ? errors['artist'] : ''}
                                                 disabled={showAddButton ? 'disabled' : ''}
                                                 value={songData.artist}
                                             />
@@ -229,12 +213,19 @@ export default function PlaylistCreator() {
                     <Grid.Column width={2}>
                     </Grid.Column>
                     <Grid.Column width={12} style={{display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '60px'}}>
-                        {(songAdded) && 
-                            <SongTable 
-                                finalize={finalize} 
-                                songs={songs} 
-                                enable={enable}
-                            />
+                        {(!loading && songAdded) && 
+                            <>
+                                <SongTable 
+                                    finalize={finalize} 
+                                    songs={songs} 
+                                    enable={enable}
+                                    readyForErrors={readyForErrors}
+                                    songError={songError}
+                                />
+                            </>
+                        }
+                        {(loading && songAdded) &&
+                            <p>loading...</p>
                         }
                     </Grid.Column>
                     <Grid.Column width={2}>

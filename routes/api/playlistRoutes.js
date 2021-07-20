@@ -16,7 +16,6 @@ router.post('/', async (req, res) => {
             }},
             { new: true, runValidators: true }
         )
-        console.log(updatedUser)
         res.json(createdPlaylist)
     }
     catch (err) {
@@ -26,33 +25,45 @@ router.post('/', async (req, res) => {
 })
 
 router.post('/songs', fileUploader.single('song'), async (req, res, next) => {
-    console.log(req.file)
-    // cloudinary.v2.uploader.upload(file, options, callback);
+
     const uploadedFile = await cloudinary.uploader.upload(req.file.path, 
     {resource_type: 'video', public_id: req.file.originalName})
-    const newSong = {
-        fileName: req.file.originalname,
-        fileType: req.file.mimetype,
-        filePath: uploadedFile.secure_url,
-        artist: req.body.artist,
-        duration: uploadedFile.duration
+
+    if (uploadedFile.duration + req.body.totalDuration > 200) {
+        return res.status(400).send('Playlists are Limited to One Hour')
     }
-    try {
-        const createdSong = await db.Song.create(newSong)
-        const updatedPlaylist = await db.Playlist.findOneAndUpdate({
-            _id: req.body.playlistId
-        }, {
-            $push: {
-                songs: createdSong._id
-            }},
-            { new: true, runValidators: true }
-        )
-        res.status(200).json(updatedPlaylist)
+
+    else {
+        try {
+            const newSong = {
+                fileName: req.file.originalname,
+                fileType: req.file.mimetype,
+                filePath: uploadedFile.secure_url,
+                artist: req.body.artist,
+                duration: uploadedFile.duration
+            }
+            const createdSong = await db.Song.create(newSong)
+            const updatedPlaylist = await db.Playlist.findOneAndUpdate({
+                _id: req.body.playlistId
+            }, {
+                $push: {
+                    songs: createdSong._id
+                }},
+                { new: true, runValidators: true }
+            )
+            res.status(200).json(updatedPlaylist)
+        }
+        catch(err) {
+            res.status(400).json(errorHandler(err))
+        }
     }
-    catch(err) {
-        console.log(err)
-        res.status(400).json(errorHandler(err))
-    }
+})
+
+router.get('/:id', async (req, res) => {
+    console.log("id" + req.params.id)
+   const foundPlaylist = await db.Playlist.findById(req.params.id)
+   .populate('songs')
+   res.json(foundPlaylist)
 })
 
 
