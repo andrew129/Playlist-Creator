@@ -1,32 +1,25 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import API from '../../../utils/API';
 import UserContext from '../../../utils/UserContext';
-import { Button, Header, Grid, Segment, Form, Input, } from 'semantic-ui-react';
-import { useContext, useRef } from 'react'
+import { Button, Header, Grid } from 'semantic-ui-react';
 import SongTable from '../../SongTable/SongTable';
 import PlaylistForm from '../../PlaylistForm';
+import SongForm from '../../SongForm';
 import Spinner from '../../Spinner';
 import axios from 'axios';
 
 export default function PlaylistCreator() {
     const user = useContext(UserContext)
-    const focusPoint = useRef(null)
     const [showPlaylistForm, setShowPlaylistForm] = useState(false)
     const [showSongForm, setShowSongForm] = useState(false)
     const [songs, setSongs] = useState([])
     const [readyForErrors, setReadyForErrors] = useState(false)
     const [errors, setErrors] = useState({})
     const [songError, setSongError] = useState('')
-    const [chooseSong, setChooseSong] = useState(false)
-    const [selectedFile, setSelectedFile] = useState(null)
     const [songAdded, setSongAdded] = useState(false)
-    const [songData, setSongData]= useState({
-        playlistId: '',
-        artist: ''
-    })
     const [loading, setLoading] = useState(false)
-    const [showAddButton, setShowAddButton] = useState(false)
+    const [showAddButton, setShowAddButton] = useState(true)
 
     useEffect(() => {
         if (errors) {
@@ -39,19 +32,6 @@ export default function PlaylistCreator() {
             setReadyForErrors(false)
         }
     }, [errors, songError])
-    
-    useEffect(() => {
-        if (selectedFile && songData.playlistId && songData.artist) {
-            createSong()
-            setSongData({
-                playlistId: '',
-                artist: ''
-            })
-        }
-        else if (songData.artist) {
-            setChooseSong(true)
-        }
-    }, [selectedFile, songData])
 
     useEffect(() => {
         if (!loading && songAdded) {
@@ -68,20 +48,11 @@ export default function PlaylistCreator() {
         console.log(songs)
     }
 
-    const addSong = e => {
-        e.preventDefault()
-        console.log(localStorage.getItem('playlistId'))
-        setSongData({...songData, playlistId: localStorage.getItem('playlistId')})
-        // setSongs([...songs, songData])
-        setSongAdded(true)
-        setShowAddButton(true)
-        setChooseSong(false)
-    }
-
-    const createSong = async () => {
+    const createSong = async (songData) => {
         setLoading(true)
+        setSongAdded(true)
         let songFormObj = new FormData()
-        songFormObj.append("song", selectedFile)
+        songFormObj.append("song", songData.selectedFile)
         songFormObj.append("artist", songData.artist)
         songFormObj.append("playlistId", songData.playlistId)
         try {
@@ -121,18 +92,13 @@ export default function PlaylistCreator() {
         console.log('finalize')
     }
 
-    const enable = () => {
-        setSongError('')
-        setChooseSong(false)
-        setShowAddButton(false)
+    const revealButton = (value) => {
+        setShowAddButton(value)
     }
 
-    const fileChange = e => {
-        if (e.target.files[0]) {
-            setSelectedFile(e.target.files[0])
-            setShowAddButton(true)
-        }
-        else return;
+    const enable = () => {
+        setSongError('')
+        setShowAddButton(false)
     }
 
     return (
@@ -172,44 +138,7 @@ export default function PlaylistCreator() {
                             />
                         }
                         {(!showPlaylistForm && showSongForm) &&
-                            <Segment raised>
-                                <Header as='h1' color='blue'>Add Songs to your Playlist</Header>
-                                <Form size='large'>
-                                        <>
-                                            <Form.Field 
-                                                control={Input}
-                                                label='Artist Name' 
-                                                className='form-field'
-                                                onChange={e => setSongData({...songData, 
-                                                artist: e.target.value})}
-                                                placeholder= 'Enter Artist Name...'
-                                                disabled={showAddButton ? 'disabled' : ''}
-                                                value={songData.artist}
-                                            />
-                                        </>
-                                    {(chooseSong) &&
-                                    <>
-                                        <Button
-                                            style={{width: '50%'}}
-                                            size='large'
-                                            content="Choose Song"
-                                            labelPosition="left"
-                                            icon="file"
-                                            onClick={() => focusPoint.current.click()}
-                                            disabled={chooseSong ? '' : 'disabled'}
-                                        />
-                                        <Form.Field
-                                            error={readyForErrors ? errors['songChoice'] : ''}
-                                        >
-                                            <input type='file' onChange={fileChange} ref={focusPoint}/>
-                                        </Form.Field>
-                                        {(showAddButton) &&
-                                            <Button style={{width: '100%'}} onClick={addSong}>Add Song</Button>
-                                        }
-                                        </>
-                                    }
-                                </Form>
-                            </Segment>
+                            <SongForm createSong={createSong} revealButton={revealButton} chooseSong={chooseSong} showAddButton={showAddButton}  />
                         }
                     </Grid.Column>
                     <Grid.Column width={4}>
