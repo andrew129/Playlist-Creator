@@ -25,40 +25,6 @@ router.post('/', async (req, res) => {
     }
 })
 
-// router.post('/songs', fileUploader.single('song'), async (req, res, next) => {
-//     const uploadedFile = await cloudinary.uploader.upload(req.file.path, 
-//     {resource_type: 'video', public_id: req.file.originalName})
-
-//     if (uploadedFile.duration + req.body.totalDuration > 2000) {
-//         return res.status(400).send('Failed Upload: Total Length of Playlist must be no longer than an hour')
-//     }
-
-//     else {
-//         try {
-//             const newSong = {
-//                 fileName: req.file.originalname.slice(0, 1).toUpperCase() + req.file.originalname.slice(1),
-//                 fileType: req.file.mimetype,
-//                 filePath: uploadedFile.secure_url,
-//                 artist: req.body.artist.slice(0, 1).toUpperCase() + req.body.artist.slice(1),
-//             }
-//             const createdSong = await db.Song.create(newSong)
-//             const updatedPlaylist = await db.Playlist.findOneAndUpdate({
-//                 _id: req.body.playlistId
-//             }, {
-//                 $push: {
-//                     songs: createdSong._id
-//                 }},
-//                 { new: true, runValidators: true }
-//             )
-//             res.status(200).json(updatedPlaylist)
-//         }
-//         catch(err) {
-//             console.log(err)
-//             res.status(400).json(errorHandler(err))
-//         }
-//     }
-// })
-
 router.post('/songs', fileUploader.single('song'), async (req, res) => {
     if (req.body.duration + req.body.totalDuration > 3600) {
         return res.status(400).send('Failed Upload: Total Length of Playlist must be no longer than an hour')
