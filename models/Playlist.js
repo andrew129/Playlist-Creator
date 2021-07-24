@@ -24,6 +24,10 @@ const PlaylistSchema = new Schema({
         type: String,
         required: [true, 'genres field cannot be blank'],
     },
+    filesToUpload: {
+        type: Array,
+        default: []
+    },
     songs: [
         {
             type: Schema.Types.ObjectId,

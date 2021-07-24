@@ -1,21 +1,18 @@
 import React from 'react';
 import { Table, Button, Header } from 'semantic-ui-react';
-
+783 / 60
 export default function SongTable(props) {
 
     const convertDuration = (duration) => {
         const decimalTime = (duration / 60).toFixed(2)
         return decimalTime.replace('.', ':')
     }
-    console.log(props.songs)
         const songs = props.songs.map(song => {
             const indexOfDot = song.fileName
                 .split('')
                 .reverse()
                 .indexOf('.')
-            console.log(indexOfDot)
             const slicePoint = (song.fileName.length - indexOfDot) - 1
-            console.log(slicePoint)
             return (
                 <Table.Row>
                     <Table.Cell>{song.fileName.slice(0, slicePoint)}</Table.Cell>

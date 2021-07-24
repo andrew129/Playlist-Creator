@@ -20,6 +20,7 @@ export default function PlaylistCreator() {
     const [songAdded, setSongAdded] = useState(false)
     const [loading, setLoading] = useState(false)
     const [showAddButton, setShowAddButton] = useState(true)
+    const [complete, setComplete] = useState(false)
 
     useEffect(() => {
         if (errors) {
@@ -39,27 +40,41 @@ export default function PlaylistCreator() {
         }
     }, [loading, songAdded])
 
+    useEffect(() => {
+        if (complete) {
+            uploadSongs()
+        }
+    }, [complete])
+
     const getPlaylist = async () => {
-        console.log(localStorage.getItem('playlistId'))
         const playlist = await axios.get('/api/playlists/' + localStorage.getItem('playlistId'))
         const playlistSongs = playlist.data.songs
-        console.log(playlistSongs)
-        setSongs(playlistSongs)
-        console.log(songs)
+        if (playlistSongs.length > 0) {
+            setSongs(playlistSongs)
+        }
+        else {
+            return;
+        }
+    }
+
+    const uploadSongs = async () => {
+        const { data } = await axios.get('/api/playlists/' + localStorage.getItem('playlistId'))
+        const uploadSongs = await axios.post('/api/playlists/uploadSongs', {files: data.filesToUpload})
+        console.log(uploadSongs)
     }
 
     const createSong = async (songData) => {
-        setLoading(true)
         setSongAdded(true)
+        setLoading(true)
         let songFormObj = new FormData()
         songFormObj.append("song", songData.selectedFile)
         songFormObj.append("artist", songData.artist)
         songFormObj.append("playlistId", songData.playlistId)
+        songFormObj.append("duration", songData.duration.toFixed(2))
         try {
             const { data } = await axios.get('/api/playlists/' + localStorage.getItem('playlistId'))
             if (data) {
                 const totalDuration = data.songs.reduce((acc, song) => acc + song.duration, 0)
-                console.log(totalDuration)
                 songFormObj.append("totalDuration", totalDuration)
             }
             await axios.post('/api/playlists/songs', songFormObj)
@@ -82,6 +97,7 @@ export default function PlaylistCreator() {
                 setShowPlaylistForm(false)
                 localStorage.setItem('playlistId', data._id)
             }
+            setErrors({})
         }
         catch (error) {
             setErrors(error.response.data)
@@ -90,6 +106,7 @@ export default function PlaylistCreator() {
 
     const finalize = () => {
         console.log('finalize')
+        setComplete(true)
     }
 
     const revealButton = (value) => {
@@ -131,14 +148,19 @@ export default function PlaylistCreator() {
                             </>
                         }
                         {(showPlaylistForm && !showSongForm) &&
-                            <PlaylistForm
-                                createPlaylist={createPlaylist} 
-                                readyForErrors={readyForErrors}
-                                errors={errors}
-                            />
+                            <>
+                                <PlaylistForm
+                                    createPlaylist={createPlaylist} 
+                                    readyForErrors={readyForErrors}
+                                    errors={errors}
+                                />
+                            </>
                         }
                         {(!showPlaylistForm && showSongForm) &&
-                            <SongForm createSong={createSong} revealButton={revealButton} chooseSong={chooseSong} showAddButton={showAddButton}  />
+                            <>  
+                                <h3 style={{color: 'red'}}>Note: You Can't Upload more than an hour worth of songs!!</h3>
+                                <SongForm createSong={createSong} revealButton={revealButton} showAddButton={showAddButton}  />
+                            </>
                         }
                     </Grid.Column>
                     <Grid.Column width={4}>

@@ -6,12 +6,14 @@ export default function SongForm(props) {
     const [songData, setSongData]= useState({
         playlistId: '',
         artist: '',
+        duration: '',
         selectedFile: null
     })
     const [showAddButton, setShowAddButton] = useState(false)
     const [chooseSong, setChooseSong] = useState(false)
+    const [songErr, setSongErr] = useState('')
     useEffect(() => {
-        if (songData.playlistId && songData.artist && songData.selectedFile) {
+        if (songData.playlistId && songData.artist && songData.selectedFile && songData.duration) {
             props.createSong(songData)
             setChooseSong(false)
             setShowAddButton(true)
@@ -28,15 +30,45 @@ export default function SongForm(props) {
 
     const fileChange = e => {
         if (e.target.files[0]) {
-            setSongData({...songData, selectedFile: e.target.files[0]})
+
+            const file = e.target.files[0];
+            const reader = new FileReader();
+        
+            reader.onload = function (event) {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+                audioContext.decodeAudioData(event.target.result, function(buffer) {
+                    const duration = buffer.duration;
+                    
+                    setSongData({...songData, duration, selectedFile: file})
+                });
+            };
+        
+            // In case that the file couldn't be read
+            reader.onerror = function (event) {
+                console.error("An error ocurred reading the file: ", event);
+            };
+        
+            reader.readAsArrayBuffer(file);
             props.revealButton(true)
             setShowAddButton(true)
         }
-        else return;
+        else {
+            return;
+        }
     }
 
     const addSong = () => {
-        setSongData({...songData, playlistId: localStorage.getItem('playlistId')})
+        console.log(songData.selectedFile.type.includes('wav')) 
+        if (songData.selectedFile.type.includes('mp3') || songData.selectedFile.type.includes('wav')) {
+            console.log(songData.selectedFile.type)
+            setSongData({...songData, playlistId: localStorage.getItem('playlistId')})
+            setSongErr('')
+        }
+        else {
+            setSongErr('Only mp3 and wav files are accepted')
+            return;
+        }
     }
     return (
         <Segment raised>
@@ -50,7 +82,6 @@ export default function SongForm(props) {
                         onChange={e => setSongData({...songData, 
                         artist: e.target.value})}
                         placeholder= 'Enter Artist Name...'
-                        disabled={showAddButton && props.showAddButton ? 'disabled' : ''}
                         value={songData.artist}
                     />
                 </>
@@ -72,6 +103,9 @@ export default function SongForm(props) {
                             <Button style={{width: '100%'}} onClick={addSong}>Add Song</Button>
                         }
                     </>
+                }
+                {(songErr) &&
+                    <Header as='h3' color='red'>{songErr ? songErr : ''}</Header>
                 }
             </Form>
         </Segment>

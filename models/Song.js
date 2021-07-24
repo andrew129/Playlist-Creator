@@ -4,11 +4,13 @@ const Schema = mongoose.Schema;
 const SongSchema = new Schema({
     fileName: {
        type: String,
-       trim: true
+       trim: true,
+    //    unique: [true, 'Filename has already been Taken!! Try another']
     },
     filePath: {
         type: String,
-        trim: true 
+        trim: true,
+        default: ''
     },
     fileType: {
         type: String,
@@ -30,7 +32,3 @@ const SongSchema = new Schema({
 const Playlist = mongoose.model('Song', SongSchema);
 
 module.exports = Playlist;
-
-// cloudinary.v2.uploader.upload("sample_spreadsheet.xls", 
-//   { resource_type: "auto" }, 
-//   function(error, result) {console.log(result, error); });
