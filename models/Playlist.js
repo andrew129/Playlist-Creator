@@ -28,12 +28,19 @@ const PlaylistSchema = new Schema({
         type: Array,
         default: []
     },
+    finalized: {
+        type: Boolean,
+        default: false
+    },
     songs: [
         {
             type: Schema.Types.ObjectId,
             ref: "Song"
         }
-    ]
+    ],
+    imageUrl: {
+        type: String,
+    }
 });
 
 const Playlist = mongoose.model('Playlist', PlaylistSchema);

@@ -1,11 +1,13 @@
 import React, {useContext} from 'react';
 import { Menu, Icon, Header, Button, Dropdown } from 'semantic-ui-react';
 import UserContext from '../../utils/UserContext';
+import {useHistory} from 'react-router-dom';
 import './style.css'
 import API from '../../utils/API';
 
 export default function MainMenu() {
     const user = useContext(UserContext)
+    const history = useHistory()
 
     const logout = () => {
       API.logoutUser().then(() => window.location.reload())
@@ -45,7 +47,10 @@ export default function MainMenu() {
               >
               <Dropdown.Menu>
                 <Dropdown.Item 
-                 text='My Playlists' 
+                  onClick={() => 
+                  history.push(`/users/${user.data['First Name']}
+                  -${user.data['Last Name']}-${user.data._id}/createdPlaylists`)} 
+                  text='My Playlists' 
                 />
                 <Dropdown.Item onClick={logout} text='Logout' />
               </Dropdown.Menu>
@@ -56,4 +61,6 @@ export default function MainMenu() {
       </Menu>
     )
 }
+
+
 

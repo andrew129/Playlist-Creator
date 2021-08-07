@@ -45,6 +45,27 @@ router.get('/info', function(req, res) {
     }
 })
 
+router.get('/playlistData/:id', async function(req, res) {
+    console.log(req.params.id)
+    try {
+        const userPlaylistData = await User.findOne(
+            {
+               _id: req.params.id 
+            }
+        ).populate({
+            path: "createdPlaylists",
+            populate: {
+               path: "songs" 
+            }
+        })
+        console.log(userPlaylistData)
+        res.status(200).json(userPlaylistData)
+    }
+    catch (err) {
+        console.log(err.message)
+    }
+})
+
 module.exports = router
 
 

@@ -4,13 +4,16 @@ import GenreOptions from './pages/Playlist/genreOptions.json'
 
 const fieldNames = ['Name', 'Genre', 'Tags']
 
+
 export default function PlaylistForm(props) {
 
     const [formData, setFormData] = useState({
-        name: '',
-        tags: '',
-        genre: ''
+        name: 'chicken',
+        tags: 'chicken',
+        genre: 'chicken'
     })
+
+       
 
     const handleChange = e => 
         setFormData({...formData, [e.target.name]: e.target.value})

@@ -59,7 +59,6 @@ export default function SongForm(props) {
     }
 
     const addSong = () => {
-        console.log(songData.selectedFile.type.includes('wav')) 
         if (songData.selectedFile.type.includes('mp3') || songData.selectedFile.type.includes('wav')) {
             console.log(songData.selectedFile.type)
             setSongData({...songData, playlistId: localStorage.getItem('playlistId')})

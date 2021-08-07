@@ -4,10 +4,28 @@ const db = require('../../models');
 const errorHandler = require('./errorHandler');
 const fileUploader = require('../../utils/fileUpload');
 const cloudinary = require('../../utils/cloudinary');
+const axios = require('axios')
 const fs = require('fs')
+
+// export default axios.create({
+//     baseURL: 'https://api.unsplash.com',
+//     headers: {
+//         Authorization: 'Client-ID df308ab04419a6fab1080bb6a1ad07a725dc5bd36b6bc21e2c7837da6274da34'
+//     }
+// })
 
 router.post('/', async (req, res) => {
     try {
+        const { data } = await axios.get(`https://api.unsplash.com/search/photos`, {
+            headers: {
+                Authorization: 'Client-ID df308ab04419a6fab1080bb6a1ad07a725dc5bd36b6bc21e2c7837da6274da34'
+            },
+            params: {
+                query: req.body.genre
+            }
+        })
+        const randomImage = getRandom(data.results, req.body.genre)
+        req.body.imageUrl = randomImage.urls.regular
         const createdPlaylist = await db.Playlist.create(req.body)
         const updatedUser = await db.User.findOneAndUpdate({
             _id: req.user._id
@@ -20,10 +38,24 @@ router.post('/', async (req, res) => {
         res.json(createdPlaylist)
     }
     catch (err) {
+        console.log(err.message)
         console.log(errorHandler(err))
         res.status(400).json(errorHandler(err))
     }
 })
+
+function getRandom(imageArr, genre) {
+    const relevantImages = imageArr.filter(image => {
+        const relevantTags = image.tags.filter(tag => 
+            tag.title === 'music' || tag.title === genre
+        )
+        if (relevantTags.length) {
+            return true
+        }
+    })
+    return relevantImages[Math.floor(Math.random() * relevantImages.length)]
+}
+
 
 router.post('/songs', fileUploader.single('song'), async (req, res) => {
     if (req.body.duration + req.body.totalDuration > 3600) {
@@ -58,12 +90,13 @@ router.post('/songs', fileUploader.single('song'), async (req, res) => {
     }
 })
 
-router.post('/uploadSongs', async (req, res) => {
-    console.log(req.body.files)
+router.put('/uploadSongs/:id', async (req, res) => {
     try {
         let uploadRes = []
+        console.log(req.body.files)
         let multiSongUpload = new Promise(async (resolve, reject) => {
             for (let i = 0; i < req.body.files.length; i++) {
+                console.log(req.body.files[i])
                 const { path } = req.body.files[i]
                 await cloudinary.uploader.upload_large(path, 
                     {resource_type: 'video'}
@@ -75,7 +108,7 @@ router.post('/uploadSongs', async (req, res) => {
                                 fileName: req.body.files[i].originalname.slice(0, 1).toUpperCase() +
                                 req.body.files[i].originalname.slice(1)
                             }, {
-                                filePath: result.secure_url
+                                filePath: result.secure_url,
                             }
                         )
                         if (i === req.body.files.length - 1) {
@@ -89,7 +122,14 @@ router.post('/uploadSongs', async (req, res) => {
             }
         })
         let upload = await multiSongUpload
-        res.status(200).json(upload)
+        console.log(upload)
+        const finishedPlaylist = await db.Playlist.findOneAndUpdate({
+            _id: req.params.id
+        }, {
+           finalized: true,
+           filesToUpload: []
+        })
+        res.status(200).json(finishedPlaylist)
     }
     catch(err) {
         console.log(err.message)
@@ -107,6 +147,7 @@ console.log("id" + req.params.id)
 
 
 module.exports = router;
+
 
 // set complete to true in the database when you click on finalize otherwise complete is false
 // display complete and incomplete playlists on users playlist page

@@ -59,7 +59,9 @@ export default function PlaylistCreator() {
 
     const uploadSongs = async () => {
         const { data } = await axios.get('/api/playlists/' + localStorage.getItem('playlistId'))
-        const uploadSongs = await axios.post('/api/playlists/uploadSongs', {files: data.filesToUpload})
+        console.log(data)
+        const uploadSongs = await axios.put('/api/playlists/uploadSongs/' +
+        localStorage.getItem('playlistId'), {files: data.filesToUpload})
         console.log(uploadSongs)
     }
 
@@ -140,7 +142,7 @@ export default function PlaylistCreator() {
                                         size='huge' 
                                         style={{width: '50%'}} 
                                         color='blue' 
-                                        href={`/users/${user.data.firstName}-${user.data.lastName}/playlists`}
+                                        href={`/users/${user.data['First Name']}-${user.data['Last Name']}-${user.data._id}/createdPlaylists`}
                                     >
                                     View My Playlists
                                     </Button>

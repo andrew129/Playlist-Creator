@@ -8,6 +8,7 @@ import {useState, useEffect, useMemo} from 'react';
 import API from './utils/API';
 import UserContext from './utils/UserContext';
 import PlaylistCreator from './components/pages/Playlist/Playlist';
+import CreatedPlaylists from './components/pages/CreatedPlaylists';
 
 function App() {
   const [user, setUser] = useState(null)
@@ -29,7 +30,7 @@ function App() {
             <Menu />
             <Route exact path='/login' component={Login} />
             <Route exact path='/register' component={Register} />
-            {/* <Route exact path='/:name/createdPlaylists' /> */}
+            <Route exact path='/users/:name/createdPlaylists' component={CreatedPlaylists} />
             <Route path='/' component={PlaylistCreator} exact />
           </UserContext.Provider>
         </Router>
